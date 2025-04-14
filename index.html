@@ -1,0 +1,314 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NEXA Quotation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+    @media print {
+      body {
+        padding: 0;
+        margin: 0;
+      }
+      #quotationForm, #printBtn, .credit {
+        display: none !important;
+      }
+      #output {
+        padding: 10px;
+        margin: 0;
+        border: none;
+      }
+      #stampImage {
+        max-width: 100px;
+        max-height: 50px;
+      }
+      .notes {
+        font-size: 11px;
+      }
+    }
+    h1, h2, h3, h4 {
+      text-align: center;
+      margin: 5px 0;
+    }
+    h1 {
+      font-size: 22px;
+      color: #003366;
+    }
+    h2 {
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+    h4 {
+      font-size: 14px;
+      text-decoration: underline;
+      margin-bottom: 10px;
+    }
+    form label {
+      display: block;
+      margin-top: 10px;
+    }
+    input {
+      width: 100%;
+      padding: 5px;
+      margin-top: 3px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px;
+      width: 100%;
+      font-size: 16px;
+      background-color: #003366;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    #output {
+      margin-top: 20px;
+      padding: 15px;
+      background: white;
+      border: 1px solid #ccc;
+    }
+    .quotation-header {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    .quotation-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+    .quotation-table td {
+      padding: 6px;
+      border: 1px solid #ddd;
+      vertical-align: top;
+    }
+    .quotation-table td:first-child {
+      width: 50%;
+    }
+    .signature-line {
+      border-top: 1px solid #000;
+      width: 200px;
+      margin: 20px 0 5px;
+    }
+    .notes {
+      font-size: 12px;
+      margin-top: 10px;
+      line-height: 1.3;
+    }
+    .notes ol {
+      padding-left: 20px;
+      margin: 5px 0;
+    }
+    .notes li {
+      margin-bottom: 3px;
+    }
+    .hidden {
+      display: none;
+    }
+    hr {
+      border: 0;
+      height: 1px;
+      background: #333;
+      margin: 8px 0;
+    }
+    .customer-details {
+      margin-bottom: 10px;
+    }
+    .footer {
+      margin-top: 10px;
+    }
+    .credit {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #666;
+      padding: 10px;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+    }
+    #stampPreview {
+      max-width: 100px;
+      max-height: 50px;
+      margin-top: 10px;
+      display: none;
+    }
+    .stamp-container {
+      text-align: center;
+      margin-top: 5px;
+    }
+    #stampImage {
+      max-width: 100px;
+      max-height: 50px;
+    }
+  </style>
+</head>
+<body>
+  <form id="quotationForm">
+    <label>Customer Name: <input name="customer" required></label>
+    <label>Date: <input type="date" name="date" required></label>
+    <label>Model: <input name="model" required></label>
+    <label>Variant: <input name="variant" required></label>
+    <label>Color: <input name="color" required></label>
+    <label>Ex-Showroom: <input name="exshowroom" type="number" required></label>
+    <label>1% TCS: <input name="tcs" type="number" required></label>
+    <label>Insurance: <input name="insurance" type="number" required></label>
+    <label>RTO: <input name="rto" type="number" required></label>
+    <label>Warranty: <input name="warranty" type="number"></label>
+    <label>Accessories: <input name="accessories" type="number"></label>
+    <label>Rewards: <input name="rewards" type="number"></label>
+    <label>FASTag: <input name="fastag" type="number"></label>
+    <label>Consumer Offer: <input name="consumer" type="number"></label>
+    <label>Retail Offer: <input name="retail" type="number"></label>
+    <label>Corporate / GST Offer: <input name="corporate" type="number"></label>
+    <label>Booking Discount: <input name="booking" type="number"></label>
+    <label>Exchange Offer: <input name="exchange" type="number"></label>
+    <label>Delivery Timeline: <input name="delivery" placeholder="e.g. 2 to 3 weeks" required></label>
+    <label>Relationship Manager: <input name="rm" required></label>
+    <label>Mobile Number: <input name="mobile" required></label>
+    <label>Upload Stamp (Optional): <input type="file" id="stampUpload" accept="image/*"></label>
+    <img id="stampPreview" alt="Stamp Preview">
+    <button type="submit">Generate Quotation</button>
+  </form>
+
+  <div class="credit">
+    Developed by Rahul Singh - Contact: 8249002815
+  </div>
+
+  <div id="output" class="hidden"></div>
+  <button id="printBtn" class="hidden">Print / Save as PDF</button>
+
+  <script>
+    let stampImageData = null;
+
+    // Handle stamp image upload
+    document.getElementById('stampUpload').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const img = document.getElementById('stampPreview');
+          img.src = event.target.result;
+          img.style.display = 'block';
+          stampImageData = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.getElementById('quotationForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target).entries());
+      
+      // Format date as DD/MM/YYYY
+      const dateObj = new Date(data.date);
+      const formattedDate = `${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${dateObj.getFullYear()}`;
+      
+      const total = [
+        'exshowroom', 'tcs', 'insurance', 'rto', 'warranty',
+        'accessories', 'rewards', 'fastag'
+      ].reduce((sum, key) => sum + Number(data[key] || 0), 0);
+
+      const net = total -
+        ['consumer', 'retail', 'corporate', 'booking', 'exchange']
+        .reduce((sum, key) => sum + Number(data[key] || 0), 0);
+
+      // Create stamp HTML if image was uploaded
+      const stampHtml = stampImageData 
+        ? `<div class="stamp-container"><img id="stampImage" src="${stampImageData}" alt="Company Stamp"></div>`
+        : '<div style="text-align: center; margin-top: 5px;"><strong>Stamp / Signature</strong></div>';
+
+      const output = `
+        <div class="quotation-header">
+          <h1>MARUTI SUZUKI NEXA</h1>
+          <h2>ODYSSEY MOTORS</h2>
+          <hr>
+          <h4>QUOTATION</h4>
+        </div>
+        
+        <div class="customer-details">
+          <p><strong>To:</strong> ${data.customer}</p>
+          <p><strong>Date:</strong> ${formattedDate}</p>
+          <p><strong>MODEL:</strong> ${data.model}</p>
+          <p><strong>VARIANT:</strong> ${data.variant}</p>
+          <p><strong>COLOR:</strong> ${data.color}</p>
+        </div>
+        
+        <table class="quotation-table">
+          <tr>
+            <td><strong>EX-SHOWROOM:</strong> Rs. ${Number(data.exshowroom).toLocaleString('en-IN')}</td>
+            <td><strong>Consumer Offer:</strong> Rs. ${Number(data.consumer).toLocaleString('en-IN')}</td>
+          </tr>
+          <tr>
+            <td><strong>1% TCS OF EXSHOWROOM:</strong> Rs. ${Number(data.tcs).toLocaleString('en-IN')}</td>
+            <td><strong>Retail Offer:</strong> Rs. ${Number(data.retail).toLocaleString('en-IN')}</td>
+          </tr>
+          <tr>
+            <td><strong>MARUTI INSURANCE (1 YR OD+3 YR TP):</strong> Rs. ${Number(data.insurance).toLocaleString('en-IN')}</td>
+            <td><strong>Corporate / GST Offer:</strong> Rs. ${Number(data.corporate).toLocaleString('en-IN')}</td>
+          </tr>
+          <tr>
+            <td><strong>RTO REGISTRATION:</strong> Rs. ${Number(data.rto).toLocaleString('en-IN')}</td>
+            <td><strong>Booking Discount:</strong> Rs. ${Number(data.booking).toLocaleString('en-IN')}</td>
+          </tr>
+          <tr>
+            <td><strong>EXTENDED WARRANTY:</strong> Rs. ${Number(data.warranty).toLocaleString('en-IN')}</td>
+            <td><strong>Exchange Offer:</strong> Rs. ${Number(data.exchange).toLocaleString('en-IN')}</td>
+          </tr>
+          <tr>
+            <td><strong>GENUINE NEXA ACCESSORIES:</strong> Rs. ${Number(data.accessories).toLocaleString('en-IN')}</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td><strong>MARUTI SUZUKI REWARDS:</strong> Rs. ${Number(data.rewards).toLocaleString('en-IN')}</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td><strong>FASTAG:</strong> Rs. ${Number(data.fastag).toLocaleString('en-IN')}</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td><strong>TOTAL AMOUNT:</strong> Rs. ${total.toLocaleString('en-IN')}</td>
+            <td><strong>Net Invoice Value:</strong> Rs. ${net.toLocaleString('en-IN')}</td>
+          </tr>
+        </table>
+        
+        <p>Delivery of Vehicle within ${data.delivery} from date of booking.</p>
+        <p>Thanking You,</p>
+        
+        <div class="signature-line"></div>
+        <p><strong>For, Odyssey Motors</strong><br>Sales Manager</p>
+        
+        <div class="footer">
+          <p><strong>Relationship Manager:</strong> ${data.rm}</p>
+          <p><strong>Mobile Number:</strong> ${data.mobile}</p>
+          
+          ${stampHtml}
+          
+          <div class="notes">
+            <p><strong>Note:</strong></p>
+            <ol>
+              <li>PRICE / SCHEMES PREVAILING AT THE TIME OF VEHICLE DELIVERY SHALL BE APPLICABLE.</li>
+              <li>All payment(s) done through Demand Draft / Payorder will be in favour of 'Odyssey Motors Pvt Ltd.'</li>
+              <li>Bank Details: NEXA SBP: ACCOUNT HOLDER NAME - ODYSSEY MOTORS PVT LTD</li>
+            </ol>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('output').innerHTML = output;
+      document.getElementById('output').style.display = 'block';
+      document.getElementById('printBtn').style.display = 'block';
+    });
+
+    document.getElementById('printBtn').addEventListener('click', () => {
+      window.print();
+    });
+  </script>
+</body>
+</html>
