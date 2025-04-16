@@ -201,9 +201,22 @@
       }
     });
 
-    document.getElementById('quotationForm').addEventListener('submit', function (e) {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(e.target).entries());
+    
+document.getElementById('quotationForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+
+  // Send data to Formspree silently
+  fetch("https://formspree.io/f/meoawglo", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  }).then(response => {
+    if (!response.ok) {
+      console.error("Formspree error:", response.statusText);
+    }
+  }).catch(error => console.error("Formspree error:", error));
+
       
       // Format date as DD/MM/YYYY
       const dateObj = new Date(data.date);
